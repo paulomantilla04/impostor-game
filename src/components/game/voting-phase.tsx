@@ -6,7 +6,7 @@ import { useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Clock, Check, AlertTriangle, Gavel } from "lucide-react"
+import { Clock, Check, AlertTriangle, Gavel, Ghost } from "lucide-react"
 import { VOTING_TIME } from "../../../convex/constants"
 import type { Doc } from "../../../convex/_generated/dataModel"
 
@@ -25,6 +25,8 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
 
     const vote = useMutation(api.game.vote)
     const processResults = useMutation(api.game.processResults)
+
+    const isSpectator = currentPlayer?.isEliminated;
 
     // Initialize hasVoted based on currentPlayer
     useEffect(() => {
@@ -48,7 +50,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
     }, [room.votingStartTime])
 
     const handleVote = async (targetSessionId: string) => {
-        if (hasVoted) return
+        if (hasVoted || isSpectator) return // Bloquear si es espectador
 
         setSelectedPlayer(targetSessionId)
         await vote({ roomId: room._id, sessionId, targetSessionId })
@@ -86,8 +88,16 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                     >
                         <Gavel className="w-8 h-8 text-destructive" />
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">Votación</h1>
-                    <p className="text-muted-foreground">¿Quién es el impostor?</p>
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Tiempo de Votación</h1>
+                    
+                    {isSpectator ? (
+                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                            <Ghost className="w-5 h-5" />
+                            <p>Estás muerto, no puedes votar. Disfruta el show.</p>
+                        </div>
+                    ) : (
+                        <p className="text-muted-foreground">¿Quién es el impostor?</p>
+                    )}
                 </motion.div>
 
                 {/* Timer */}
@@ -110,7 +120,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                     transition={{ delay: 0.2 }}
                     className="text-center text-sm text-muted-foreground"
                 >
-                    {votedCount} de {activePlayers.length} han votado
+                    {votedCount} de {activePlayers.length} jugadores han votado
                 </motion.div>
 
                 {/* Player Voting Grid */}
@@ -119,7 +129,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                         <CardHeader className="pb-2">
                             <CardTitle className="flex items-center gap-2 text-foreground">
                                 <AlertTriangle className="w-5 h-5 text-destructive" />
-                                Vota al impostor
+                                Vota por el Impostor
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -137,10 +147,10 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: 0.1 * index }}
                                                 onClick={() => handleVote(player.sessionId)}
-                                                disabled={hasVoted}
+                                                disabled={hasVoted || isSpectator}
                                                 className={`w-full flex items-center justify-between p-4 rounded-lg border transition-all ${isSelected
                                                         ? "bg-destructive/20 border-destructive"
-                                                        : hasVoted
+                                                        : (hasVoted || isSpectator)
                                                             ? "bg-secondary/30 border-border/50 opacity-50 cursor-not-allowed"
                                                             : "bg-secondary/30 border-border/50 hover:bg-secondary/50 hover:border-primary/50"
                                                     }`}
@@ -152,8 +162,9 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                                                     <span className="font-medium text-foreground">{player.name}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    {hasVoted && voteCount > 0 && (
-                                                        <span className="text-sm text-muted-foreground">{voteCount} votes</span>
+                                                    {/* Mostrar votos solo si ya voté o si soy espectador o host */}
+                                                    {(hasVoted || isSpectator || isHost) && voteCount > 0 && (
+                                                        <span className="text-sm text-muted-foreground">{voteCount} votos</span>
                                                     )}
                                                     {isSelected && (
                                                         <motion.div
@@ -178,7 +189,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                                         className="mt-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-center"
                                     >
                                         <Check className="w-5 h-5 text-green-500 inline mr-2" />
-                                        <span className="text-green-500 font-medium">Voto confirmado!</span>
+                                        <span className="text-green-500 font-medium">¡Voto Confirmado!</span>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -195,7 +206,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                         className="flex justify-center"
                     >
                         <Button onClick={handleForceReveal} variant="outline" size="lg">
-                            Revelar resultados
+                            Forzar Revelación
                         </Button>
                     </motion.div>
                 )}

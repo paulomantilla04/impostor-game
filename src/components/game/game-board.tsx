@@ -6,7 +6,7 @@ import { useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, Clock, ArrowRight, Vote, AlertTriangle, Smile } from "lucide-react"
+import { Eye, EyeOff, Clock, ArrowRight, Vote, AlertTriangle, Smile, Ghost } from "lucide-react"
 import { TURN_TIME } from "../../../convex/constants"
 import type { Doc } from "../../../convex/_generated/dataModel"
 
@@ -33,6 +33,9 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     const currentTurnPlayer = players.find((p) => p.sessionId === room.turnOrder[room.currentTurnIndex])
     const isMyTurn = currentTurnPlayer?.sessionId === sessionId
     const isSilenceMode = room.gameMode === "silence"
+    
+    // NUEVO: Detectar si soy espectador
+    const isSpectator = currentPlayer?.isEliminated
 
     // Turn timer
     useEffect(() => {
@@ -48,14 +51,17 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     }, [room.turnStartTime])
 
     const handlePassTurn = async () => {
+        if (isSpectator) return // Bloquear acción
         await passTurn({ roomId: room._id })
     }
 
     const handleCallVote = async () => {
+        if (isSpectator) return // Bloquear acción
         await callVote({ roomId: room._id, sessionId })
     }
 
     const handleEmojiClick = (emoji: string) => {
+        if (isSpectator) return // Bloquear emojis si quieres, o dejarlos para que se diviertan
         setSelectedEmoji(emoji)
         setTimeout(() => setSelectedEmoji(null), 2000)
     }
@@ -64,8 +70,8 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     const getRoleInfo = () => {
         if (isImpostor) {
             return {
-                title: "Tú eres el IMPOSTOR",
-                subtitle: "Intenta pasar desapercibido sin saber la palabra!",
+                title: "Eres el IMPOSTOR",
+                subtitle: "¡Disimula! No conoces la palabra secreta.",
                 color: "from-red-600 to-red-800",
                 icon: <AlertTriangle className="w-8 h-8" />,
             }
@@ -75,7 +81,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
         if (currentPlayer?.secretRole === "detective") {
             roleExtra = " (Detective)"
         } else if (currentPlayer?.secretRole === "clown") {
-            roleExtra = " (Clown)"
+            roleExtra = " (Payaso)"
         }
 
         return {
@@ -104,23 +110,32 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                     className="flex items-center justify-between"
                 >
                     <div>
-                        <h1 className="text-xl font-bold text-foreground">Round {room.roundNumber}</h1>
+                        <h1 className="text-xl font-bold text-foreground">Ronda {room.roundNumber}</h1>
                         <p className="text-sm text-muted-foreground">Sala: {room.code}</p>
                     </div>
+                    {/* Indicador de Espectador */}
+                    {isSpectator && (
+                        <div className="bg-destructive/20 border border-destructive/50 text-destructive px-3 py-1 rounded-full flex items-center gap-2">
+                            <Ghost className="w-4 h-4" />
+                            <span className="font-bold text-sm">Modo Espectador</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Clock className="w-4 h-4" />
                         <span className="font-mono">{Math.floor(room.discussionTime / 60)}:00 total</span>
                     </div>
                 </motion.div>
 
-                {/* Role Card - Hold to Reveal */}
+                {/* Role Card - Hold to Reveal (Si es espectador, mostramos que está eliminado) */}
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
                     <Card
                         className={`border-border/50 bg-card/80 backdrop-blur-xl overflow-hidden cursor-pointer transition-all ${isHolding ? "ring-2 ring-primary" : ""
                             }`}
                         onMouseDown={() => {
-                            setIsHolding(true)
-                            setShowRole(true)
+                            if (!isSpectator) {
+                                setIsHolding(true)
+                                setShowRole(true)
+                            }
                         }}
                         onMouseUp={() => {
                             setIsHolding(false)
@@ -131,8 +146,10 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                             setShowRole(false)
                         }}
                         onTouchStart={() => {
-                            setIsHolding(true)
-                            setShowRole(true)
+                            if (!isSpectator) {
+                                setIsHolding(true)
+                                setShowRole(true)
+                            }
                         }}
                         onTouchEnd={() => {
                             setIsHolding(false)
@@ -140,41 +157,52 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                         }}
                     >
                         <CardContent className="p-8">
-                            <AnimatePresence mode="wait">
-                                {showRole ? (
-                                    <motion.div
-                                        key="revealed"
-                                        initial={{ opacity: 0, rotateY: 90 }}
-                                        animate={{ opacity: 1, rotateY: 0 }}
-                                        exit={{ opacity: 0, rotateY: -90 }}
-                                        className="text-center"
-                                    >
-                                        <div
-                                            className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${roleInfo.color} text-white mb-4`}
+                            {isSpectator ? (
+                                <div className="text-center opacity-70">
+                                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/20 mb-4">
+                                        <Ghost className="w-8 h-8 text-destructive" />
+                                    </div>
+                                    <h2 className="text-xl font-medium text-foreground mb-2">Has sido eliminado</h2>
+                                    <p className="text-sm text-muted-foreground">Observa la partida en silencio.</p>
+                                    <p className="text-lg font-bold mt-2 text-primary">Palabra: {room.currentWord}</p>
+                                </div>
+                            ) : (
+                                <AnimatePresence mode="wait">
+                                    {showRole ? (
+                                        <motion.div
+                                            key="revealed"
+                                            initial={{ opacity: 0, rotateY: 90 }}
+                                            animate={{ opacity: 1, rotateY: 0 }}
+                                            exit={{ opacity: 0, rotateY: -90 }}
+                                            className="text-center"
                                         >
-                                            {roleInfo.icon}
-                                        </div>
-                                        <h2 className={`text-3xl font-bold mb-2 ${isImpostor ? "text-red-500" : "text-primary"}`}>
-                                            {roleInfo.title}
-                                        </h2>
-                                        <p className="text-muted-foreground">{roleInfo.subtitle}</p>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        key="hidden"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className="text-center"
-                                    >
-                                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
-                                            <EyeOff className="w-8 h-8 text-muted-foreground" />
-                                        </div>
-                                        <h2 className="text-xl font-medium text-foreground mb-2">Mantén presionado para revelar tu rol</h2>
-                                        <p className="text-sm text-muted-foreground">No lo reveles!</p>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                                            <div
+                                                className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${roleInfo.color} text-white mb-4`}
+                                            >
+                                                {roleInfo.icon}
+                                            </div>
+                                            <h2 className={`text-3xl font-bold mb-2 ${isImpostor ? "text-red-500" : "text-primary"}`}>
+                                                {roleInfo.title}
+                                            </h2>
+                                            <p className="text-muted-foreground">{roleInfo.subtitle}</p>
+                                        </motion.div>
+                                    ) : (
+                                        <motion.div
+                                            key="hidden"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            className="text-center"
+                                        >
+                                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
+                                                <EyeOff className="w-8 h-8 text-muted-foreground" />
+                                            </div>
+                                            <h2 className="text-xl font-medium text-foreground mb-2">Mantén presionado para ver tu rol</h2>
+                                            <p className="text-sm text-muted-foreground">¡Mantenlo en secreto!</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>
@@ -206,10 +234,10 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                     </AnimatePresence>
                                     <div>
                                         <p className="font-medium text-foreground">
-                                            {isMyTurn ? "Tu turno!" : `Turno de ${currentTurnPlayer?.name}`}
+                                            {isMyTurn ? "¡Tu Turno!" : `Turno de ${currentTurnPlayer?.name}`}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {isSilenceMode ? "Usa solo emojis!" : "Describe algo relacionado con la palabra"}
+                                            {isSilenceMode ? "¡Usa solo emojis!" : "Describe algo relacionado con la palabra"}
                                         </p>
                                     </div>
                                 </div>
@@ -218,10 +246,10 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                         <p className="text-2xl font-mono font-bold text-foreground">{turnTimeLeft}s</p>
                                         <p className="text-xs text-muted-foreground">restantes</p>
                                     </div>
-                                    {isMyTurn && (
+                                    {isMyTurn && !isSpectator && (
                                         <Button onClick={handlePassTurn} variant="outline" size="sm">
                                             <ArrowRight className="w-4 h-4 mr-1" />
-                                            Pasar turno
+                                            Pasar
                                         </Button>
                                     )}
                                 </div>
@@ -237,7 +265,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                             <CardHeader className="pb-2">
                                 <CardTitle className="flex items-center gap-2 text-foreground text-sm">
                                     <Smile className="w-4 h-4 text-primary" />
-                                    Reacciona con emojis (Modo silencio)
+                                    Reacciona con Emojis (Modo Silencio)
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -248,6 +276,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                             variant="outline"
                                             className={`text-2xl h-12 ${selectedEmoji === emoji ? "bg-primary/20 border-primary" : ""}`}
                                             onClick={() => handleEmojiClick(emoji)}
+                                            disabled={isSpectator}
                                         >
                                             {emoji}
                                         </Button>
@@ -271,22 +300,28 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                     if (!player) return null
                                     const isActive = index === room.currentTurnIndex
                                     const isPast = index < room.currentTurnIndex
+                                    const isDead = player.isEliminated
 
                                     return (
                                         <motion.div
                                             key={player._id}
                                             className={`flex flex-col items-center gap-1 p-2 rounded-lg transition-all ${isActive ? "bg-primary/20 ring-2 ring-primary" : isPast ? "opacity-50" : "hover:bg-secondary/50"
-                                                }`}
+                                                } ${isDead ? "grayscale opacity-40" : ""}`}
                                             animate={isActive ? { scale: [1, 1.05, 1] } : {}}
                                             transition={{ repeat: isActive ? Number.POSITIVE_INFINITY : 0, duration: 2 }}
                                         >
                                             <div
-                                                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${isActive
+                                                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold relative ${isActive
                                                         ? "bg-gradient-to-br from-primary to-accent text-primary-foreground"
                                                         : "bg-secondary text-secondary-foreground"
                                                     }`}
                                             >
                                                 {player.name.charAt(0).toUpperCase()}
+                                                {isDead && (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full">
+                                                        <Ghost className="w-6 h-6 text-white" />
+                                                    </div>
+                                                )}
                                             </div>
                                             <span className="text-xs text-center truncate w-full text-foreground">{player.name}</span>
                                         </motion.div>
@@ -297,18 +332,20 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                     </Card>
                 </motion.div>
 
-                {/* Call Vote Button */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                    className="flex justify-center"
-                >
-                    <Button onClick={handleCallVote} size="lg" variant="destructive" className="w-full max-w-md">
-                        <Vote className="w-5 h-5 mr-2" />
-                        Llama a votar
-                    </Button>
-                </motion.div>
+                {/* Call Vote Button - SOLO PARA EL HOST Y NO ESPECTADORES */}
+                {isHost && !isSpectator && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="flex justify-center"
+                    >
+                        <Button onClick={handleCallVote} size="lg" variant="destructive" className="w-full max-w-md">
+                            <Vote className="w-5 h-5 mr-2" />
+                            Llamar a Votación
+                        </Button>
+                    </motion.div>
+                )}
             </div>
         </div>
     )

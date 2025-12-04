@@ -117,14 +117,24 @@ export const getRoom = query({
 })
 
 export const getRoomByCode = query({
-  args: { code: v.string() },
-  handler: async (ctx: any, args: any) => {
-    return await ctx.db
+  args: { code: v.string(), sessionId: v.optional(v.string()) }, // Aceptamos sessionId opcional
+  handler: async (ctx, args) => {
+    const room = await ctx.db
       .query("rooms")
-      .withIndex("by_code", (q: any) => q.eq("code", args.code.toUpperCase()))
-      .first()
+      .withIndex("by_code", (q) => q.eq("code", args.code.toUpperCase()))
+      .first();
+
+    if (!room) return null;
+
+    // LÓGICA DE SEGURIDAD:
+    // Si hay un sessionId y ese usuario es un impostor, ocultamos la palabra
+    if (args.sessionId && room.impostorIds.includes(args.sessionId)) {
+      return { ...room, currentWord: "???" }; // Ocultamos la palabra
+    }
+
+    return room;
   },
-})
+});
 
 export const getPlayers = query({
   args: { roomId: v.id("rooms") },

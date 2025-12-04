@@ -126,10 +126,10 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                                                     <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-500 rounded-full">Host</span>
                                                 ) : player.isReady ? (
                                                     <span className="text-xs px-2 py-1 bg-green-500/20 text-green-500 rounded-full flex items-center gap-1">
-                                                        <Check className="w-3 h-3" /> Ready
+                                                        <Check className="w-3 h-3" /> Listo
                                                     </span>
                                                 ) : (
-                                                    <span className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded-full">Waiting</span>
+                                                    <span className="text-xs px-2 py-1 bg-muted text-muted-foreground rounded-full">Esperando</span>
                                                 )}
                                             </div>
                                         </motion.div>

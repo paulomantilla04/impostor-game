@@ -16,6 +16,7 @@ export default defineSchema({
     turnStartTime: v.optional(v.number()),
     votingStartTime: v.optional(v.number()),
     roundNumber: v.number(),
+    turnsPlayed: v.optional(v.number()), // NUEVO CAMPO
   }).index("by_code", ["code"]),
 
   players: defineTable({

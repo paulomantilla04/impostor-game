@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useCallback } from "react" // Ya no necesitas useState ni useEffect
 import { useRouter } from "next/navigation"
 import { useMutation } from "convex/react"
 import { api } from "../../convex/_generated/api"
@@ -9,18 +9,14 @@ import { getSessionId } from "../../lib/session"
 
 export default function HomePage() {
   const router = useRouter()
-  const [sessionId, setSessionId] = useState<string>("")
 
   const createRoomMutation = useMutation(api.rooms.createRoom)
   const joinRoomMutation = useMutation(api.rooms.joinRoom)
 
-  useEffect(() => {
-    setSessionId(getSessionId())
-  }, [])
 
   const handleCreateRoom = useCallback(
     async (hostName: string) => {
-      const sid = getSessionId()
+      const sid = getSessionId() // Sigue funcionando perfecto
       const result = await createRoomMutation({ hostName, sessionId: sid })
       router.push(`/room/${result.code}`)
       return result
@@ -30,7 +26,7 @@ export default function HomePage() {
 
   const handleJoinRoom = useCallback(
     async (playerName: string, roomCode: string) => {
-      const sid = getSessionId()
+      const sid = getSessionId() // Sigue funcionando perfecto
       const result = await joinRoomMutation({
         playerName,
         roomCode: roomCode.toUpperCase(),
