@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
+import { api } from "../../convex/_generated/api"
 import { HomeScreen } from "@/components/game/home-screen"
-import { getSessionId } from "@/lib/session"
+import { getSessionId } from "../../lib/session"
 
 export default function HomePage() {
   const router = useRouter()

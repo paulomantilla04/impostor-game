@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { ConvexClientProvider } from "@/lib/convex"
+import { ConvexClientProvider } from "../../lib/convex"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })

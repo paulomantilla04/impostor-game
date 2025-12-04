@@ -6,7 +6,7 @@ function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
   }
   return shuffled
 }
@@ -28,8 +28,8 @@ export const startGame = mutation({
       .collect()
 
     // Pick random word from selected category
-    const category = room.category || "Animals"
-    const words = WORD_CATEGORIES[category as keyof typeof WORD_CATEGORIES] || WORD_CATEGORIES.Animals
+    const category = room.category || "Animales"
+    const words = WORD_CATEGORIES[category as keyof typeof WORD_CATEGORIES] || WORD_CATEGORIES.Animales
     const word = words[Math.floor(Math.random() * words.length)]
 
     // Determine number of impostors based on game mode

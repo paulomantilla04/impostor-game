@@ -190,12 +190,12 @@ export const canStartGame = query({
       .collect()
 
     if (players.length < MIN_PLAYERS) {
-      return { canStart: false, reason: `Need at least ${MIN_PLAYERS} players` }
+      return { canStart: false, reason: `Necesita al menos ${MIN_PLAYERS} jugadores` }
     }
 
     const allReady = players.every((p: any) => p.isReady || p.isHost)
     if (!allReady) {
-      return { canStart: false, reason: "All players must be ready" }
+      return { canStart: false, reason: "Todos los jugadores deben estar listos" }
     }
 
     return { canStart: true }

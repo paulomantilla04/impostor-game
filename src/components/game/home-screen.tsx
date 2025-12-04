@@ -24,7 +24,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
 
   const handleCreate = async () => {
     if (!hostName.trim()) {
-      setError("Please enter your name")
+      setError("Por favor ingresa tu nombre")
       return
     }
 
@@ -33,7 +33,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
     try {
       await onCreateRoom(hostName.trim())
     } catch (err: any) {
-      setError(err.message || "Failed to create room")
+      setError(err.message || "No se pudo crear la sala")
     } finally {
       setIsLoading(false)
     }
@@ -41,11 +41,11 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
 
   const handleJoin = async () => {
     if (!playerName.trim()) {
-      setError("Please enter your name")
+      setError("Por favor ingresa tu nombre")
       return
     }
     if (!roomCode.trim()) {
-      setError("Please enter room code")
+      setError("Por favor ingresa el código de la sala")
       return
     }
 
@@ -54,7 +54,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
     try {
       await onJoinRoom(playerName.trim(), roomCode.trim().toUpperCase())
     } catch (err: any) {
-      setError(err.message || "Failed to join room")
+      setError(err.message || "No se pudo unir a la sala")
     } finally {
       setIsLoading(false)
     }
@@ -89,7 +89,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
             <CardTitle className="text-3xl font-bold text-balance bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
               Impostor
             </CardTitle>
-            <CardDescription className="text-muted-foreground">Find the impostor before they blend in</CardDescription>
+            <CardDescription className="text-muted-foreground">Encuentra al impostor antes de que les gane a todos</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -115,14 +115,14 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Create Room
+                  Crear Sala
                 </TabsTrigger>
                 <TabsTrigger
                   value="join"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
                 >
                   <LogIn className="w-4 h-4 mr-2" />
-                  Join Room
+                  Unirme a una sala
                 </TabsTrigger>
               </TabsList>
 
@@ -135,11 +135,11 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                 >
                   <div className="space-y-2">
                     <Label htmlFor="hostName" className="text-foreground">
-                      Your Name
+                      Tu nombre
                     </Label>
                     <Input
                       id="hostName"
-                      placeholder="Enter your name..."
+                      placeholder="Ingresa tu nombre..."
                       value={hostName}
                       onChange={(e) => setHostName(e.target.value)}
                       className="bg-input border-border focus:border-primary"
@@ -155,12 +155,12 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Creating...
+                        Creando...
                       </>
                     ) : (
                       <>
                         <Users className="w-4 h-4 mr-2" />
-                        Create Room
+                        Crear Sala
                       </>
                     )}
                   </Button>
@@ -176,11 +176,11 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                 >
                   <div className="space-y-2">
                     <Label htmlFor="playerName" className="text-foreground">
-                      Your Name
+                      Tu nombre
                     </Label>
                     <Input
                       id="playerName"
-                      placeholder="Enter your name..."
+                      placeholder="Ingresa tu nombre..."
                       value={playerName}
                       onChange={(e) => setPlayerName(e.target.value)}
                       className="bg-input border-border focus:border-primary"
@@ -189,11 +189,11 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="roomCode" className="text-foreground">
-                      Room Code
+                      Codigo de la sala
                     </Label>
                     <Input
                       id="roomCode"
-                      placeholder="Enter room code..."
+                      placeholder="Ingresa el codigo de la sala..."
                       value={roomCode}
                       onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                       className="bg-input border-border focus:border-primary uppercase font-mono tracking-widest text-center text-lg"
@@ -209,12 +209,12 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                     {isLoading ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Joining...
+                        Uniendo...
                       </>
                     ) : (
                       <>
                         <LogIn className="w-4 h-4 mr-2" />
-                        Join Room
+                        Unirme a una sala
                       </>
                     )}
                   </Button>
@@ -223,7 +223,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
             </Tabs>
 
             <div className="mt-6 pt-4 border-t border-border/50">
-              <p className="text-xs text-muted-foreground text-center">3-10 players needed to start a game</p>
+              <p className="text-xs text-muted-foreground text-center">3-10 jugadores necesarios para iniciar el juego</p>
             </div>
           </CardContent>
         </Card>

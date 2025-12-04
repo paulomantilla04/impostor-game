@@ -1,5 +1,5 @@
 export const WORD_CATEGORIES = {
-  Animals: [
+  Animales: [
     "León",
     "Elefante",
     "Delfín",
@@ -15,7 +15,7 @@ export const WORD_CATEGORIES = {
     "Guepardo",
     "Búho",
   ],
-  Movies: [
+  Películas: [
     "Titanic",
     "Avatar",
     "El Origen",
@@ -28,7 +28,7 @@ export const WORD_CATEGORIES = {
     "El Padrino",
     "Rocky",
   ],
-  Food: [
+  Comida: [
     "Pizza",
     "Sushi",
     "Hamburguesa",
@@ -43,7 +43,7 @@ export const WORD_CATEGORIES = {
     "Bistec",
     "Burrito",
   ],
-  Places: [
+  Lugares: [
     "París",
     "Tokio",
     "Playa",
@@ -58,7 +58,7 @@ export const WORD_CATEGORIES = {
     "Escuela",
     "Restaurante",
   ],
-  Objects: [
+  Objetos: [
     "Guitarra",
     "Laptop",
     "Bicicleta",
@@ -73,7 +73,7 @@ export const WORD_CATEGORIES = {
     "Teléfono",
     "Telescopio",
   ],
-  Sports: [
+  Deportes: [
     "Fútbol",
     "Básquetbol",
     "Tenis",
@@ -89,7 +89,7 @@ export const WORD_CATEGORIES = {
     "Bádminton",
   ],
 
-  FootballPlayers: [
+  Jugadores: [
     "Lionel Messi",
     "Cristiano Ronaldo",
     "Kylian Mbappé",
@@ -107,7 +107,7 @@ export const WORD_CATEGORIES = {
     "Gianluigi Buffon",
   ],
 
-  Superheros: [
+  Superheroes: [
     "Spiderman",
     "Capitan America",
     "Iron Man",
@@ -131,18 +131,18 @@ export const WORD_CATEGORIES = {
 
 
 export const GAME_MODES = [
-  { value: "classic", label: "Classic (1 Impostor)" },
-  { value: "double", label: "Double Agent (2 Impostors)" },
+  { value: "classic", label: "Clásico (1 Impostor)" },
+  { value: "double", label: "Doble Agente (2 Impostores)" },
   { value: "silence", label: "Silence Mode (No Talking)" },
   { value: "secret", label: "Secret Roles (Detective/Clown)" },
   { value: "team", label: "Team vs Team" },
 ] as const
 
 export const DISCUSSION_TIMES = [
-  { value: 180, label: "3 Minutes" },
-  { value: 300, label: "5 Minutes" },
-  { value: 420, label: "7 Minutes" },
-  { value: 600, label: "10 Minutes" },
+  { value: 180, label: "3 minutos" },
+  { value: 300, label: "5 minutos" },
+  { value: 420, label: "7 minutos" },
+  { value: 600, label: "10 minutos" },
 ] as const
 
 export const MIN_PLAYERS = 3

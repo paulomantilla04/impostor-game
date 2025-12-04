@@ -3,11 +3,11 @@
 import { useMemo } from "react"
 import { motion } from "framer-motion"
 import { useMutation } from "convex/react"
-import { api } from "@/convex/_generated/api"
+import { api } from "../../../convex/_generated/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Trophy, Skull, Eye, RefreshCw, RotateCcw, Crown, Star } from "lucide-react"
-import type { Doc } from "@/convex/_generated/dataModel"
+import type { Doc } from "../../../convex/_generated/dataModel"
 
 interface ResultsPhaseProps {
   room: Doc<"rooms">
