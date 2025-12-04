@@ -64,8 +64,8 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     const getRoleInfo = () => {
         if (isImpostor) {
             return {
-                title: "You are the IMPOSTOR",
-                subtitle: "Blend in without knowing the word!",
+                title: "Tú eres el IMPOSTOR",
+                subtitle: "Intenta pasar desapercibido sin saber la palabra!",
                 color: "from-red-600 to-red-800",
                 icon: <AlertTriangle className="w-8 h-8" />,
             }
@@ -80,7 +80,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
 
         return {
             title: room.currentWord || "???",
-            subtitle: `This is the secret word${roleExtra}`,
+            subtitle: `Esta es la palabra secreta${roleExtra}`,
             color: "from-primary to-accent",
             icon: <Eye className="w-8 h-8" />,
         }
@@ -105,7 +105,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                 >
                     <div>
                         <h1 className="text-xl font-bold text-foreground">Round {room.roundNumber}</h1>
-                        <p className="text-sm text-muted-foreground">Room: {room.code}</p>
+                        <p className="text-sm text-muted-foreground">Sala: {room.code}</p>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                         <Clock className="w-4 h-4" />
@@ -170,8 +170,8 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
                                             <EyeOff className="w-8 h-8 text-muted-foreground" />
                                         </div>
-                                        <h2 className="text-xl font-medium text-foreground mb-2">Hold to Reveal Your Role</h2>
-                                        <p className="text-sm text-muted-foreground">Keep it secret from others!</p>
+                                        <h2 className="text-xl font-medium text-foreground mb-2">Mantén presionado para revelar tu rol</h2>
+                                        <p className="text-sm text-muted-foreground">No lo reveles!</p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -206,22 +206,22 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                     </AnimatePresence>
                                     <div>
                                         <p className="font-medium text-foreground">
-                                            {isMyTurn ? "Your Turn!" : `${currentTurnPlayer?.name}'s Turn`}
+                                            {isMyTurn ? "Tu turno!" : `Turno de ${currentTurnPlayer?.name}`}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
-                                            {isSilenceMode ? "Use emojis only!" : "Describe something related to the word"}
+                                            {isSilenceMode ? "Usa solo emojis!" : "Describe algo relacionado con la palabra"}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     <div className="text-right">
                                         <p className="text-2xl font-mono font-bold text-foreground">{turnTimeLeft}s</p>
-                                        <p className="text-xs text-muted-foreground">remaining</p>
+                                        <p className="text-xs text-muted-foreground">restantes</p>
                                     </div>
                                     {isMyTurn && (
                                         <Button onClick={handlePassTurn} variant="outline" size="sm">
                                             <ArrowRight className="w-4 h-4 mr-1" />
-                                            Pass
+                                            Pasar turno
                                         </Button>
                                     )}
                                 </div>
@@ -237,7 +237,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                             <CardHeader className="pb-2">
                                 <CardTitle className="flex items-center gap-2 text-foreground text-sm">
                                     <Smile className="w-4 h-4 text-primary" />
-                                    React with Emojis (Silence Mode)
+                                    Reacciona con emojis (Modo silencio)
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -262,7 +262,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                     <Card className="border-border/50 bg-card/80 backdrop-blur-xl">
                         <CardHeader className="pb-2">
-                            <CardTitle className="text-foreground text-sm">Players</CardTitle>
+                            <CardTitle className="text-foreground text-sm">Jugadores</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
@@ -306,7 +306,7 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                 >
                     <Button onClick={handleCallVote} size="lg" variant="destructive" className="w-full max-w-md">
                         <Vote className="w-5 h-5 mr-2" />
-                        Call for Vote
+                        Llama a votar
                     </Button>
                 </motion.div>
             </div>

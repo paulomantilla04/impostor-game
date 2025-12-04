@@ -61,24 +61,24 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
     switch (winner) {
       case "citizens":
         return {
-          title: "Citizens Win!",
-          subtitle: "The impostor was caught!",
+          title: "Los insanos ganaron!",
+          subtitle: "El impostor fue atrapado!",
           icon: <Trophy className="w-12 h-12" />,
           color: "from-green-500 to-emerald-600",
           bgColor: "bg-green-500/20",
         }
       case "impostors":
         return {
-          title: "Impostor Wins!",
-          subtitle: "An innocent was eliminated...",
+          title: "Los impostores ganaron!",
+          subtitle: "Un inocente fue eliminado...",
           icon: <Skull className="w-12 h-12" />,
           color: "from-red-500 to-rose-600",
           bgColor: "bg-red-500/20",
         }
       case "clown":
         return {
-          title: "Clown Wins!",
-          subtitle: "The clown wanted to be voted out!",
+          title: "El payaso gano!",
+          subtitle: "El payaso queria ser votado!",
           icon: <span className="text-5xl">🤡</span>,
           color: "from-purple-500 to-pink-600",
           bgColor: "bg-purple-500/20",
@@ -140,20 +140,20 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-foreground">
                 <Eye className="w-5 h-5 text-primary" />
-                The Reveal
+                Revelación
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Secret Word */}
               <div className="p-4 bg-primary/10 rounded-lg border border-primary/30 text-center">
-                <p className="text-sm text-muted-foreground mb-1">The secret word was</p>
+                <p className="text-sm text-muted-foreground mb-1">La palabra secreta era</p>
                 <p className="text-3xl font-bold text-primary">{room.currentWord}</p>
               </div>
 
               {/* Impostors */}
               <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/30">
                 <p className="text-sm text-muted-foreground mb-3">
-                  {impostors.length > 1 ? "The Impostors were" : "The Impostor was"}
+                  {impostors.length > 1 ? "Los impostores eran" : "El impostor era"}
                 </p>
                 <div className="flex flex-wrap gap-3 justify-center">
                   {impostors.map((impostor) => (
@@ -176,7 +176,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
               {/* Eliminated Player */}
               {eliminatedPlayer && (
                 <div className="p-4 bg-secondary/50 rounded-lg border border-border/50 text-center">
-                  <p className="text-sm text-muted-foreground mb-2">Eliminated this round</p>
+                  <p className="text-sm text-muted-foreground mb-2">Eliminado en esta ronda</p>
                   <div className="flex items-center justify-center gap-2">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-bold">
                       {eliminatedPlayer.name.charAt(0).toUpperCase()}
@@ -200,7 +200,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-foreground">
                 <Star className="w-5 h-5 text-yellow-500" />
-                Scoreboard
+                Tabla de puntuación
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -235,7 +235,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
                         <span className="font-medium text-foreground">{player.name}</span>
                         {player.isHost && <Crown className="w-4 h-4 text-yellow-500" />}
                         {room.impostorIds.includes(player.sessionId) && (
-                          <span className="text-xs px-2 py-0.5 bg-destructive/20 text-destructive rounded-full">
+                          <span className="text-xs px-2 py-0.5 bg-red-500 text-white rounded-full">
                             Impostor
                           </span>
                         )}
@@ -263,11 +263,11 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
               className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90"
             >
               <RefreshCw className="w-5 h-5 mr-2" />
-              Play Again
+              Jugar de nuevo
             </Button>
             <Button onClick={handleResetRoom} variant="outline" size="lg" className="flex-1 bg-transparent">
               <RotateCcw className="w-5 h-5 mr-2" />
-              Reset Room
+              Resetear sala
             </Button>
           </motion.div>
         )}
@@ -279,7 +279,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
             transition={{ delay: 1.2 }}
             className="text-center text-muted-foreground"
           >
-            Waiting for host to start next round...
+            Esperando al host para iniciar la siguiente ronda...
           </motion.p>
         )}
       </div>

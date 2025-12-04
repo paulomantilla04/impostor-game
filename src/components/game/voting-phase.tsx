@@ -86,8 +86,8 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                     >
                         <Gavel className="w-8 h-8 text-destructive" />
                     </motion.div>
-                    <h1 className="text-3xl font-bold text-foreground mb-2">Voting Time</h1>
-                    <p className="text-muted-foreground">Who is the Impostor?</p>
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Votación</h1>
+                    <p className="text-muted-foreground">¿Quién es el impostor?</p>
                 </motion.div>
 
                 {/* Timer */}
@@ -110,7 +110,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                     transition={{ delay: 0.2 }}
                     className="text-center text-sm text-muted-foreground"
                 >
-                    {votedCount} of {activePlayers.length} players have voted
+                    {votedCount} de {activePlayers.length} han votado
                 </motion.div>
 
                 {/* Player Voting Grid */}
@@ -119,7 +119,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                         <CardHeader className="pb-2">
                             <CardTitle className="flex items-center gap-2 text-foreground">
                                 <AlertTriangle className="w-5 h-5 text-destructive" />
-                                Vote for the Impostor
+                                Vota al impostor
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -178,7 +178,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                                         className="mt-4 p-3 bg-green-500/20 border border-green-500/50 rounded-lg text-center"
                                     >
                                         <Check className="w-5 h-5 text-green-500 inline mr-2" />
-                                        <span className="text-green-500 font-medium">Vote Confirmed!</span>
+                                        <span className="text-green-500 font-medium">Voto confirmado!</span>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
@@ -195,7 +195,7 @@ export function VotingPhase({ room, players, sessionId, isHost, currentPlayer }:
                         className="flex justify-center"
                     >
                         <Button onClick={handleForceReveal} variant="outline" size="lg">
-                            Force Reveal Results
+                            Revelar resultados
                         </Button>
                     </motion.div>
                 )}

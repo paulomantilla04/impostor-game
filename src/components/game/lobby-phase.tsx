@@ -30,7 +30,8 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
     const canStartResult = useQuery(api.rooms.canStartGame, { roomId: room._id })
 
     const copyCode = async () => {
-        await navigator.clipboard.writeText(room.code)
+        const url = `${window.location.origin}/room/${room.code}`
+        await navigator.clipboard.writeText(url)
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
@@ -71,7 +72,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
                     <h1 className="text-2xl font-bold text-foreground mb-2">Sala de Lobby</h1>
                     <div className="flex items-center justify-center gap-3">
-                        <span className="text-muted-foreground">Codigo de la sala:</span>
+                        <span className="text-muted-foreground">Código de la sala:</span>
                         <button
                             onClick={copyCode}
                             className="flex items-center gap-2 px-4 py-2 bg-primary/20 border border-primary/50 rounded-lg hover:bg-primary/30 transition-colors"
@@ -80,7 +81,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                             {copied ? <Check className="w-5 h-5 text-green-500" /> : <Copy className="w-5 h-5 text-primary" />}
                         </button>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-2">Comparte este codigo con tus amigos para unirte</p>
+                    <p className="text-sm text-muted-foreground mt-2">Toca el código para copiar el enlace de invitación</p>
                 </motion.div>
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -115,7 +116,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                                                         <span className="font-medium text-foreground">{player.name}</span>
                                                         {player.isHost && <Crown className="w-4 h-4 text-yellow-500" />}
                                                         {player.sessionId === sessionId && (
-                                                            <span className="text-xs text-muted-foreground">(You)</span>
+                                                            <span className="text-xs text-muted-foreground">(Tú)</span>
                                                         )}
                                                     </div>
                                                 </div>
@@ -142,7 +143,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                                         variant={currentPlayer.isReady ? "outline" : "default"}
                                         className="w-full mt-4"
                                     >
-                                        {currentPlayer.isReady ? "Cancel Ready" : "Mark as Ready"}
+                                        {currentPlayer.isReady ? "Cancelar listo" : "Marcar como listo"}
                                     </Button>
                                 )}
                             </CardContent>
