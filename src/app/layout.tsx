@@ -1,12 +1,16 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Montserrat, Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ConvexClientProvider } from "../../lib/convex"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
+const _montserrat = Montserrat({ subsets: ["latin"] })
+const _inter = Inter({ subsets: ["latin"] })
+
+
 
 export const metadata: Metadata = {
   title: "Impostor - Social Deduction Game",
@@ -43,7 +47,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`font-sans antialiased min-h-screen`}>
+      <body className={`font-sans ${_montserrat.className} antialiased min-h-screen`}>
         <ConvexClientProvider>{children}</ConvexClientProvider>
         <Analytics />
       </body>

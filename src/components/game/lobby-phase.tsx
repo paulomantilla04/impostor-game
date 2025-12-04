@@ -70,7 +70,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
             <div className="w-full max-w-4xl relative z-10 space-y-6">
                 {/* Room Code Header */}
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
-                    <h1 className="text-2xl font-bold text-foreground mb-2">Sala de Lobby</h1>
+                    <h1 className="text-2xl font-bold text-foreground mb-2">Sala de espera</h1>
                     <div className="flex items-center justify-center gap-3">
                         <span className="text-muted-foreground">Código de la sala:</span>
                         <button

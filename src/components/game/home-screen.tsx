@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, Users, Plus, LogIn, Loader2 } from "lucide-react"
+import { Montserrat } from "next/font/google"
+
+const _montserrat = Montserrat({ subsets: ["latin"] })
 
 interface HomeScreenProps {
   onCreateRoom: (hostName: string) => Promise<{ roomId: string; code: string }>
@@ -86,10 +89,10 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
                 <Eye className="w-10 h-10 text-primary-foreground" />
               </div>
             </motion.div>
-            <CardTitle className="text-3xl font-bold text-balance bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+            <CardTitle className={`text-3xl font-bold text-balance bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text ${_montserrat.className}`}>
               Impostor
             </CardTitle>
-            <CardDescription className="text-muted-foreground">Encuentra al impostor antes de que les gane a todos</CardDescription>
+            <CardDescription className={`text-muted-foreground ${_montserrat.className}`}>Encuentra al impostor antes de que les gane a todos</CardDescription>
           </CardHeader>
 
           <CardContent>
@@ -108,7 +111,7 @@ export function HomeScreen({ onCreateRoom, onJoinRoom }: HomeScreenProps) {
               )}
             </AnimatePresence>
 
-            <Tabs defaultValue="create" className="w-full">
+            <Tabs defaultValue="create" className={`w-full ${_montserrat.className}`}>
               <TabsList className="grid w-full grid-cols-2 mb-6 bg-secondary/50">
                 <TabsTrigger
                   value="create"
