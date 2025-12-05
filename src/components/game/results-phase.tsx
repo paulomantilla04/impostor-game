@@ -139,6 +139,8 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
   const winnerDisplay = getWinnerDisplay()
   const isGameOver = winnerType !== "continue"
 
+  const confusedPlayer = players.find(p => p.secretRole === "confused");
+
   return (
     <div className="min-h-screen p-4 bg-gradient-to-br from-background via-background to-primary/10">
       <div className="max-w-2xl mx-auto space-y-6 relative z-10">
@@ -172,9 +174,20 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
                 </CardHeader>
                 <CardContent className="space-y-4">
                 <div className="p-4 bg-primary/10 rounded-lg border border-primary/30 text-center">
-                    <p className="text-sm text-muted-foreground mb-1">La palabra secreta era</p>
+                    <p className="text-sm text-muted-foreground mb-1">La palabra secreta REAL era</p>
                     <p className="text-3xl font-bold text-primary">{room.currentWord}</p>
                 </div>
+
+                {/* MOSTRAR AL CONFUNDIDO SI EXISTE */}
+                {confusedPlayer && room.wrongWord && (
+                     <div className="p-4 bg-orange-500/10 rounded-lg border border-orange-500/30 text-center mt-2">
+                        <p className="text-sm text-muted-foreground mb-1">
+                            <span className="font-bold text-foreground">{confusedPlayer.name}</span> estaba confundido con:
+                        </p>
+                        <p className="text-2xl font-bold text-orange-500 line-through decoration-2">{room.wrongWord}</p>
+                    </div>
+                )}
+
                 <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/30">
                     <p className="text-sm text-muted-foreground mb-3">Los Impostores eran</p>
                     <div className="flex flex-wrap gap-3 justify-center">

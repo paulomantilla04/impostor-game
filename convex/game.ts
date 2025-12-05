@@ -28,9 +28,26 @@ export const startGame = mutation({
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
       .collect()
 
+    if (room.gameMode === "confusion" && players.length < 4){
+      throw new Error("Este modo requiere al menos 4 jugadores");
+    }
+
     const categoryString = room.category || "Animales"
     const words = WORD_CATEGORIES[categoryString as keyof typeof WORD_CATEGORIES] || WORD_CATEGORIES.Animales;
-    const word = words[Math.floor(Math.random() * words.length)]
+
+    // Seleccionar palabra correcta
+    const wordIndex = Math.floor(Math.random() * words.length);
+    const word = words[wordIndex];
+
+    // Seleccionar palabra incorrecta (si aplica)
+    let wrongWord = undefined;
+    if (room.gameMode === "confusion") {
+      let wrongWordIndex = Math.floor(Math.random() * words.length);
+      while (wrongWordIndex === wordIndex) {
+        wrongWordIndex = Math.floor(Math.random() * words.length);
+      }
+      wrongWord = words[wrongWordIndex];
+    }
 
     let impostorCount = 1
     if (room.gameMode === "double" && players.length >= 5) {
@@ -44,15 +61,21 @@ export const startGame = mutation({
 
     const impostorIds = candidatePool.slice(0, impostorCount).map((p) => p.sessionId)
 
+    // Filtrar a los que no son impostores para asignar roles especiales
+    const citizens = players.filter((p) => !impostorIds.includes(p.sessionId));
+    const shuffledCitizens = shuffleArray(citizens);
+
+    // Modo Secret
     if (room.gameMode === "secret") {
       const roles = ["detective", "clown"]
-      const roleAssignments = shuffleArray(players.filter((p) => !impostorIds.includes(p.sessionId))).slice(0, 2)
-
-      for (let i = 0; i < roleAssignments.length && i < roles.length; i++) {
-        await ctx.db.patch(roleAssignments[i]._id, {
-          secretRole: roles[i],
-        })
+      for (let i = 0; i < shuffledCitizens.length && i < roles.length; i++) {
+        await ctx.db.patch(shuffledCitizens[i]._id, { secretRole: roles[i] })
       }
+    }
+
+    // Modo confusion
+    if (room.gameMode === "confusion" && shuffledCitizens.length > 0){
+      await ctx.db.patch(shuffledCitizens[0]._id, { secretRole: "confused"});
     }
 
     const turnOrder = shuffleArray(players.map((p) => p.sessionId))
@@ -60,6 +83,7 @@ export const startGame = mutation({
     await ctx.db.patch(args.roomId, {
       status: "playing",
       currentWord: word,
+      wrongWord: wrongWord,
       impostorIds,
       turnOrder,
       currentTurnIndex: 0,
@@ -332,6 +356,7 @@ export const playAgain = mutation({
     await ctx.db.patch(args.roomId, {
       status: "waiting",
       currentWord: undefined,
+      wrongWord: undefined,
       impostorIds: [],
       turnOrder: [],
       currentTurnIndex: 0,
@@ -371,6 +396,7 @@ export const resetRoom = mutation({
     await ctx.db.patch(args.roomId, {
       status: "waiting",
       currentWord: undefined,
+      wrongWord: undefined,
       impostorIds: [],
       turnOrder: [],
       currentTurnIndex: 0,

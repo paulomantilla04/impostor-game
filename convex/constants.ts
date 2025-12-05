@@ -273,6 +273,25 @@ Celebridades: [
     "Bárbaros",
     "Recolector de Elixir",
     "Tesla"
+  ],
+  Kings: [
+    "Aldahir Rojas",
+    "Alfonso Linares",
+    "Arath JG",
+    "Arturo Barradas",
+    "Christian Mijangos",
+    "Eduardo Zendejas",
+    "Iker Ruiz",
+    "Luis Carlos",
+    "Mario OZ",
+    "Alejandrez",
+    "Omar Alexandro",
+    "Omar Vazquez",
+    "Paulo",
+    "Rafael",
+    "Ricardo Carreto",
+    "Said Cisneros",
+    "Victor Balcazar",
   ]
 } as const;
 
@@ -287,11 +306,13 @@ export const CATEGORY_LABELS: Record<string, string> = {
   Jugadores: "Futbolistas", 
   Superheroes: "Superhéroes", 
   ClashRoyale: "Clash Royale", 
+  Kings: "Kings"
 } as const;
 
 export const GAME_MODES = [
   { value: "classic", label: "Clásico (1 Impostor)" },
   { value: "double", label: "Doble Agente (2 Impostores)" },
+  { value: "confusion", label: "Confusión (1 Impostor)" },
   { value: "silence", label: "Silence Mode (No Talking)" },
   { value: "secret", label: "Secret Roles (Detective/Clown)" },
   { value: "team", label: "Team vs Team" },
@@ -305,5 +326,5 @@ export const DISCUSSION_TIMES = [
 ] as const
 
 export const MIN_PLAYERS = 3
-export const TURN_TIME = 30 // seconds per turn
-export const VOTING_TIME = 60 // seconds for voting
+export const TURN_TIME = 30 
+export const VOTING_TIME = 60

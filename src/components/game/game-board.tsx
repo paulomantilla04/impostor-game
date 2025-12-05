@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
@@ -23,6 +23,8 @@ const EMOJI_GRID = ["👍", "👎", "🤔", "😂", "😱", "🤫", "👀", "❓
 export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: GameBoardProps) {
     const [turnTimeLeft, setTurnTimeLeft] = useState(TURN_TIME)
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
+    
+    const autoPassTriggered = useRef(false)
 
     const passTurn = useMutation(api.game.passTurn)
     const callVote = useMutation(api.game.callVote)
@@ -37,6 +39,15 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     const currentCategoryKey = (room.category || "Animales") as keyof typeof CATEGORY_LABELS;
     const categoryName = CATEGORY_LABELS[currentCategoryKey] || room.category || "Animales";
 
+    const handlePassTurn = async () => {
+        if (isSpectator) return
+        await passTurn({ roomId: room._id })
+    }
+
+    useEffect(() => {
+        autoPassTriggered.current = false
+    }, [room.turnStartTime])
+
     useEffect(() => {
         if (!room.turnStartTime) return
 
@@ -44,15 +55,17 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
             const elapsed = Math.floor((Date.now() - room.turnStartTime!) / 1000)
             const remaining = Math.max(0, TURN_TIME - elapsed)
             setTurnTimeLeft(remaining)
+
+            // Lógica de Pase Automático
+            if (remaining === 0 && isMyTurn && !isSpectator && !autoPassTriggered.current) {
+                console.log("Tiempo agotado, pasando turno automáticamente...")
+                autoPassTriggered.current = true
+                handlePassTurn()
+            }
         }, 1000)
 
         return () => clearInterval(interval)
-    }, [room.turnStartTime])
-
-    const handlePassTurn = async () => {
-        if (isSpectator) return
-        await passTurn({ roomId: room._id })
-    }
+    }, [room.turnStartTime, isMyTurn, isSpectator]) // Añadidas dependencias necesarias
 
     const handleCallVote = async () => {
         // Permitimos al Host llamar votación aunque sea espectador
@@ -82,6 +95,16 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
         } else if (currentPlayer?.secretRole === "clown") {
             roleExtra = " (Payaso)"
         }
+
+        if (currentPlayer?.secretRole === "confused") {
+             return {
+                title: room.wrongWord || "???", // Ve la palabra incorrecta
+                subtitle: "Esta es la palabra secreta",
+                color: "from-primary to-accent",
+                icon: <Eye className="w-8 h-8" />,
+            }
+        }
+        
 
         return {
             title: room.currentWord || "???",
