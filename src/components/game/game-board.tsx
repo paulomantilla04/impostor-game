@@ -6,8 +6,8 @@ import { useMutation } from "convex/react"
 import { api } from "../../../convex/_generated/api"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, Clock, ArrowRight, Vote, AlertTriangle, Smile, Ghost } from "lucide-react"
-import { TURN_TIME } from "../../../convex/constants"
+import { Eye, Clock, ArrowRight, Vote, AlertTriangle, Smile, Ghost } from "lucide-react"
+import { TURN_TIME, CATEGORY_LABELS } from "../../../convex/constants"
 import type { Doc } from "../../../convex/_generated/dataModel"
 
 interface GameBoardProps {
@@ -21,8 +21,6 @@ interface GameBoardProps {
 const EMOJI_GRID = ["👍", "👎", "🤔", "😂", "😱", "🤫", "👀", "❓", "❌", "✅", "🔥", "💀"]
 
 export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: GameBoardProps) {
-    const [showRole, setShowRole] = useState(false)
-    const [isHolding, setIsHolding] = useState(false)
     const [turnTimeLeft, setTurnTimeLeft] = useState(TURN_TIME)
     const [selectedEmoji, setSelectedEmoji] = useState<string | null>(null)
 
@@ -34,10 +32,11 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     const isMyTurn = currentTurnPlayer?.sessionId === sessionId
     const isSilenceMode = room.gameMode === "silence"
     
-    // NUEVO: Detectar si soy espectador
     const isSpectator = currentPlayer?.isEliminated
 
-    // Turn timer
+    const currentCategoryKey = (room.category || "Animales") as keyof typeof CATEGORY_LABELS;
+    const categoryName = CATEGORY_LABELS[currentCategoryKey] || room.category || "Animales";
+
     useEffect(() => {
         if (!room.turnStartTime) return
 
@@ -51,22 +50,22 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
     }, [room.turnStartTime])
 
     const handlePassTurn = async () => {
-        if (isSpectator) return // Bloquear acción
+        if (isSpectator) return
         await passTurn({ roomId: room._id })
     }
 
     const handleCallVote = async () => {
-        if (isSpectator) return // Bloquear acción
+        // Permitimos al Host llamar votación aunque sea espectador
+        if (isSpectator && !isHost) return 
         await callVote({ roomId: room._id, sessionId })
     }
 
     const handleEmojiClick = (emoji: string) => {
-        if (isSpectator) return // Bloquear emojis si quieres, o dejarlos para que se diviertan
+        if (isSpectator) return
         setSelectedEmoji(emoji)
         setTimeout(() => setSelectedEmoji(null), 2000)
     }
 
-    // Get role display info
     const getRoleInfo = () => {
         if (isImpostor) {
             return {
@@ -96,14 +95,12 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
 
     return (
         <div className="min-h-screen p-4 bg-gradient-to-br from-background via-background to-primary/10">
-            {/* Background decoration */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
                 <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-accent/20 rounded-full blur-3xl" />
             </div>
 
             <div className="max-w-4xl mx-auto space-y-6 relative z-10">
-                {/* Header with room info */}
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -111,13 +108,17 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                 >
                     <div>
                         <h1 className="text-xl font-bold text-foreground">Ronda {room.roundNumber}</h1>
-                        <p className="text-sm text-muted-foreground">Sala: {room.code}</p>
+                        <div className="flex flex-col sm:flex-row sm:gap-4 text-sm text-muted-foreground">
+                            <p>Sala: <span className="font-mono text-foreground">{room.code}</span></p>
+                            <p className="hidden sm:block text-border">|</p>
+                            <p>Categoría: <span className="text-primary font-semibold">{categoryName}</span></p>
+                        </div>
                     </div>
-                    {/* Indicador de Espectador */}
+
                     {isSpectator && (
                         <div className="bg-destructive/20 border border-destructive/50 text-destructive px-3 py-1 rounded-full flex items-center gap-2">
                             <Ghost className="w-4 h-4" />
-                            <span className="font-bold text-sm">Modo Espectador</span>
+                            <span className="font-bold text-sm hidden sm:inline">Modo Espectador</span>
                         </div>
                     )}
                     <div className="flex items-center gap-2 text-muted-foreground">
@@ -126,36 +127,9 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                     </div>
                 </motion.div>
 
-                {/* Role Card - Hold to Reveal (Si es espectador, mostramos que está eliminado) */}
+                {/* Role Card - SIEMPRE VISIBLE */}
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 }}>
-                    <Card
-                        className={`border-border/50 bg-card/80 backdrop-blur-xl overflow-hidden cursor-pointer transition-all ${isHolding ? "ring-2 ring-primary" : ""
-                            }`}
-                        onMouseDown={() => {
-                            if (!isSpectator) {
-                                setIsHolding(true)
-                                setShowRole(true)
-                            }
-                        }}
-                        onMouseUp={() => {
-                            setIsHolding(false)
-                            setShowRole(false)
-                        }}
-                        onMouseLeave={() => {
-                            setIsHolding(false)
-                            setShowRole(false)
-                        }}
-                        onTouchStart={() => {
-                            if (!isSpectator) {
-                                setIsHolding(true)
-                                setShowRole(true)
-                            }
-                        }}
-                        onTouchEnd={() => {
-                            setIsHolding(false)
-                            setShowRole(false)
-                        }}
-                    >
+                    <Card className="border-border/50 bg-card/80 backdrop-blur-xl overflow-hidden">
                         <CardContent className="p-8">
                             {isSpectator ? (
                                 <div className="text-center opacity-70">
@@ -167,41 +141,21 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                                     <p className="text-lg font-bold mt-2 text-primary">Palabra: {room.currentWord}</p>
                                 </div>
                             ) : (
-                                <AnimatePresence mode="wait">
-                                    {showRole ? (
-                                        <motion.div
-                                            key="revealed"
-                                            initial={{ opacity: 0, rotateY: 90 }}
-                                            animate={{ opacity: 1, rotateY: 0 }}
-                                            exit={{ opacity: 0, rotateY: -90 }}
-                                            className="text-center"
-                                        >
-                                            <div
-                                                className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${roleInfo.color} text-white mb-4`}
-                                            >
-                                                {roleInfo.icon}
-                                            </div>
-                                            <h2 className={`text-3xl font-bold mb-2 ${isImpostor ? "text-red-500" : "text-primary"}`}>
-                                                {roleInfo.title}
-                                            </h2>
-                                            <p className="text-muted-foreground">{roleInfo.subtitle}</p>
-                                        </motion.div>
-                                    ) : (
-                                        <motion.div
-                                            key="hidden"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="text-center"
-                                        >
-                                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-secondary mb-4">
-                                                <EyeOff className="w-8 h-8 text-muted-foreground" />
-                                            </div>
-                                            <h2 className="text-xl font-medium text-foreground mb-2">Mantén presionado para ver tu rol</h2>
-                                            <p className="text-sm text-muted-foreground">¡Mantenlo en secreto!</p>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="text-center"
+                                >
+                                    <div
+                                        className={`inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br ${roleInfo.color} text-white mb-4`}
+                                    >
+                                        {roleInfo.icon}
+                                    </div>
+                                    <h2 className={`text-3xl font-bold mb-2 ${isImpostor ? "text-red-500" : "text-primary"}`}>
+                                        {roleInfo.title}
+                                    </h2>
+                                    <p className="text-muted-foreground">{roleInfo.subtitle}</p>
+                                </motion.div>
                             )}
                         </CardContent>
                     </Card>
@@ -332,17 +286,22 @@ export function GameBoard({ room, players, sessionId, isHost, currentPlayer }: G
                     </Card>
                 </motion.div>
 
-                {/* Call Vote Button - SOLO PARA EL HOST Y NO ESPECTADORES */}
-                {isHost && !isSpectator && (
+                {/* Call Vote Button - Host puede llamar aunque sea espectador */}
+                {isHost && (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
                         className="flex justify-center"
                     >
-                        <Button onClick={handleCallVote} size="lg" variant="destructive" className="w-full max-w-md">
+                        <Button 
+                             onClick={handleCallVote} 
+                             size="lg" 
+                             variant="destructive" 
+                             className="w-full max-w-md"
+                        >
                             <Vote className="w-5 h-5 mr-2" />
-                            Llamar a Votación
+                            Llamar a Votación {isSpectator && "(Como Host)"}
                         </Button>
                     </motion.div>
                 )}

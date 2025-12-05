@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { mutation, query } from "./_generated/server"
 import { WORD_CATEGORIES } from "./constants"
-import { Doc } from "./_generated/dataModel" // IMPORTANTE: Importar Doc
+import { Doc } from "./_generated/dataModel"
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array]
@@ -23,15 +23,13 @@ export const startGame = mutation({
       throw new Error("Only host can start game")
     }
 
-    // TIPADO CORREGIDO: Especificamos que players es un array de Doc<"players">
     const players: Doc<"players">[] = await ctx.db
       .query("players")
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
       .collect()
 
-    const category = room.category || "Animales"
-    // @ts-ignore
-    const words = WORD_CATEGORIES[category] || WORD_CATEGORIES.Animales
+    const categoryString = room.category || "Animales"
+    const words = WORD_CATEGORIES[categoryString as keyof typeof WORD_CATEGORIES] || WORD_CATEGORIES.Animales;
     const word = words[Math.floor(Math.random() * words.length)]
 
     let impostorCount = 1
@@ -40,15 +38,17 @@ export const startGame = mutation({
     }
 
     const shuffledPlayers = shuffleArray(players)
-    const impostorIds = shuffledPlayers.slice(0, impostorCount).map((p) => p.sessionId)
+    const previousImpostorIds = room.impostorIds || []
+    const validCandidates = shuffledPlayers.filter(p => !previousImpostorIds.includes(p.sessionId));
+    const candidatePool = validCandidates.length >= impostorCount ? validCandidates : shuffledPlayers;
+
+    const impostorIds = candidatePool.slice(0, impostorCount).map((p) => p.sessionId)
 
     if (room.gameMode === "secret") {
       const roles = ["detective", "clown"]
-      // TIPADO CORREGIDO: p tiene tipo correcto ahora
       const roleAssignments = shuffleArray(players.filter((p) => !impostorIds.includes(p.sessionId))).slice(0, 2)
 
       for (let i = 0; i < roleAssignments.length && i < roles.length; i++) {
-        // TIPADO CORREGIDO: roleAssignments[i] ya no es unknown
         await ctx.db.patch(roleAssignments[i]._id, {
           secretRole: roles[i],
         })
@@ -65,14 +65,12 @@ export const startGame = mutation({
       currentTurnIndex: 0,
       turnStartTime: Date.now(),
       roundNumber: 1,
-      turnsPlayed: 0, // Reiniciar contador de turnos
+      turnsPlayed: 0,
     })
 
     return { word, impostorIds }
   },
 })
-
-// En convex/game.ts
 
 export const passTurn = mutation({
   args: {
@@ -84,16 +82,14 @@ export const passTurn = mutation({
       throw new Error("Invalid game state")
     }
 
-    // Necesitamos los jugadores para saber quién está eliminado
     const players = await ctx.db
       .query("players")
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
       .collect()
 
-    // Lógica de límite de turnos (se mantiene igual)
     const totalPlayers = room.turnOrder.length
     const currentTurns = (room.turnsPlayed || 0) + 1
-    const maxTurns = totalPlayers * 3
+    const maxTurns = totalPlayers * 2
 
     if (currentTurns >= maxTurns) {
        for (const player of players) await ctx.db.patch(player._id, { votedFor: undefined })
@@ -105,25 +101,20 @@ export const passTurn = mutation({
        return;
     }
 
-    // --- CORRECCIÓN: SALTAR JUGADORES ELIMINADOS ---
     let nextIndex = (room.currentTurnIndex + 1) % room.turnOrder.length
     let loopCount = 0
     
-    // Buscamos el siguiente jugador que NO esté eliminado
     while (loopCount < room.turnOrder.length) {
         const nextSessionId = room.turnOrder[nextIndex]
         const nextPlayer = players.find(p => p.sessionId === nextSessionId)
         
-        // Si encontramos un jugador vivo, paramos aquí
         if (nextPlayer && !nextPlayer.isEliminated) {
             break
         }
         
-        // Si está eliminado, avanzamos al siguiente índice
         nextIndex = (nextIndex + 1) % room.turnOrder.length
         loopCount++
     }
-    // ----------------------------------------------
 
     await ctx.db.patch(args.roomId, {
       currentTurnIndex: nextIndex,
@@ -144,7 +135,6 @@ export const callVote = mutation({
       throw new Error("Invalid game state")
     }
 
-    // SEGURIDAD: Solo el Host puede llamar a votación
     if (room.hostId !== args.sessionId) {
       throw new Error("Solo el anfitrión puede llamar a votación")
     }
@@ -210,7 +200,6 @@ export const processResults = mutation({
       .withIndex("by_room", (q) => q.eq("roomId", args.roomId))
       .collect()
 
-    // 1. Contar votos
     const voteCounts: Record<string, number> = {}
     for (const player of players) {
       if (player.votedFor && !player.isEliminated) {
@@ -218,7 +207,6 @@ export const processResults = mutation({
       }
     }
 
-    // 2. Encontrar al más votado (Manejo de empates)
     let maxVotes = 0
     let candidates: string[] = [] 
 
@@ -236,46 +224,35 @@ export const processResults = mutation({
       eliminatedSessionId = candidates[0]
     }
 
-    // 3. Determinar Estado del Juego (Ganar o Continuar)
     let winner: "citizens" | "impostors" | "clown" | "continue" = "continue"
 
     if (eliminatedSessionId) {
       const eliminatedPlayer = players.find((p) => p.sessionId === eliminatedSessionId)
       
-      // Marcar eliminado
       if (eliminatedPlayer) {
         await ctx.db.patch(eliminatedPlayer._id, { isEliminated: true })
       }
 
-      // Re-calcular contadores tras eliminación
-      // Nota: Usamos el estado actualizado virtualmente
       const activePlayers = players.filter(p => !p.isEliminated && p.sessionId !== eliminatedSessionId)
       const activeImpostors = activePlayers.filter(p => room.impostorIds.includes(p.sessionId))
       const activeCitizens = activePlayers.filter(p => !room.impostorIds.includes(p.sessionId))
 
-      // Chequear victoria del Payaso
       if (room.gameMode === "secret" && eliminatedPlayer?.secretRole === "clown") {
         winner = "clown"
       } 
-      // Chequear victoria Ciudadanos (0 impostores vivos)
       else if (activeImpostors.length === 0) {
         winner = "citizens"
-        // Puntos Ciudadanos
         for (const player of players) {
             if (!room.impostorIds.includes(player.sessionId)) await ctx.db.patch(player._id, { score: player.score + 10 })
         }
       } 
-      // Chequear victoria Impostores (Impostores >= Ciudadanos)
       else if (activeImpostors.length >= activeCitizens.length) {
         winner = "impostors"
-        // Puntos Impostores
         for (const player of players) {
             if (room.impostorIds.includes(player.sessionId)) await ctx.db.patch(player._id, { score: player.score + 15 })
         }
       }
-      // Si no se cumple ninguna, winner sigue siendo "continue"
     } else {
-      // Empate, nadie eliminado, el juego continúa
       winner = "continue"
     }
 
@@ -287,7 +264,6 @@ export const processResults = mutation({
   },
 })
 
-// En convex/game.ts
 
 export const nextRound = mutation({
     args: {
@@ -305,8 +281,6 @@ export const nextRound = mutation({
         await ctx.db.patch(player._id, { votedFor: undefined })
       }
 
-      // --- CORRECCIÓN: EMPEZAR CON JUGADOR VIVO ---
-      // Encontrar el primer índice válido (puede que no sea el 0 si el primer jugador fue eliminado)
       let startIndex = 0
       let loopCount = 0
       
@@ -320,11 +294,10 @@ export const nextRound = mutation({
           startIndex = (startIndex + 1) % room.turnOrder.length
           loopCount++
       }
-      // -------------------------------------------
   
       await ctx.db.patch(args.roomId, {
         status: "playing",
-        currentTurnIndex: startIndex, // Usamos el índice calculado
+        currentTurnIndex: startIndex,
         turnStartTime: Date.now(),
         turnsPlayed: 0,
       })

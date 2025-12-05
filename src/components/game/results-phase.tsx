@@ -92,7 +92,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
     switch (winnerType) {
       case "citizens":
         return {
-          title: "¡Ciudadanos Ganan!",
+          title: "¡Los tilines ganan!",
           subtitle: "¡El impostor fue atrapado!",
           icon: <Trophy className="w-12 h-12" />,
           color: "from-green-500 to-emerald-600",
@@ -100,7 +100,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
         }
       case "impostors":
         return {
-          title: "¡Impostor Gana!",
+          title: "¡Los impostores ganan!",
           subtitle: "Superaron en número a los ciudadanos...",
           icon: <Skull className="w-12 h-12" />,
           color: "from-red-500 to-rose-600",
@@ -248,7 +248,7 @@ export function ResultsPhase({ room, players, sessionId, isHost }: ResultsPhaseP
                     </Button>
                 </>
             ) : (
-                <Button onClick={handleNextRound} size="lg" className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600">
+                <Button onClick={handleNextRound} size="lg" className="flex-1 bg-gradient-to-r from-violet-600 to-indigo-600">
                     <ArrowRight className="w-5 h-5 mr-2" /> Siguiente Ronda
                 </Button>
             )}

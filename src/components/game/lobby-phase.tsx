@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Crown, Check, Copy, Users, Settings, Play, Loader2 } from "lucide-react"
-import { GAME_MODES, DISCUSSION_TIMES, WORD_CATEGORIES } from "../../../convex/constants"
+import { GAME_MODES, DISCUSSION_TIMES, WORD_CATEGORIES, CATEGORY_LABELS } from "../../../convex/constants"
 import type { Doc } from "../../../convex/_generated/dataModel"
 
 interface LobbyPhaseProps {
@@ -136,7 +136,6 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                                     ))}
                                 </div>
 
-                                {/* Ready Button for non-host players */}
                                 {!isHost && currentPlayer && (
                                     <Button
                                         onClick={handleToggleReady}
@@ -185,7 +184,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                                 <div className="space-y-2">
                                     <Label className="text-foreground">Categoria de Palabras</Label>
                                     <Select
-                                        value={room.category || "Animals"}
+                                        value={room.category || "Animales"}
                                         onValueChange={(value) => handleUpdateSettings("category", value)}
                                         disabled={!isHost}
                                     >
@@ -195,7 +194,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                                         <SelectContent>
                                             {categories.map((cat) => (
                                                 <SelectItem key={cat} value={cat}>
-                                                    {cat}
+                                                    {CATEGORY_LABELS[cat as keyof typeof CATEGORY_LABELS] || cat}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -231,7 +230,7 @@ export function LobbyPhase({ room, players, sessionId, isHost, currentPlayer }: 
                     </motion.div>
                 </div>
 
-                {/* Start Game Button (Host Only) */}
+
                 {isHost && (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
